@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script src="./src/dist/redux.js"></script>
+  <script type="module">
+    const { createStore } = Redux
+
+    function counter(state = 0, action) {
+      switch (action.type) {
+      case 'INCREMENT':
+        return state + 1
+      case 'DECREMENT':
+        return state - 1
+      default:
+        return state
+      }
+    }
+
+    const store = createStore(counter)
+    store.subscribe(() => {
+      console.log(store.getState())
+    })
+
+    store.dispatch({ type: 'INCREMENT' })
+    // 1
+    store.dispatch({ type: 'INCREMENT' })
+    // 2
+    store.dispatch({ type: 'DECREMENT' })
+    // 1
+  </script>
+</body>
+</html>
