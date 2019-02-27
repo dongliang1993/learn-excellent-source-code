@@ -112,6 +112,9 @@ function assertReducerShape(reducers) {
  * if the state passed to them was undefined, and the current state for any
  * unrecognized action.
  *
+ * 接受一个 object，这个 object 的 values 就是拆分开的每一个 reducer
+ * reducer 里面不能返回 undefined，所以你在写 reducer 的时候，一定要设置 initial state 和 default case
+ * 
  * @returns {Function} A reducer function that invokes every reducer inside the
  * passed object, and builds a state object with the same shape.
  */
@@ -163,6 +166,7 @@ export default function combineReducers(reducers) {
   }
 
   // 返回结合起来的 Reducer
+  // 如果是多个 reducer 组合在一起，那么 state 只能是一个 object
   return function combination(state = {}, action) {
     if (shapeAssertionError) {
       throw shapeAssertionError
