@@ -31,11 +31,11 @@ function bindActionCreator(actionCreator, dispatch) {
  * every action creator wrapped into the `dispatch` call. If you passed a
  * function as `actionCreators`, the return value will also be a single
  * function.
- * 一个与原对象类似的对象，只不过这个对象中的的每个函数值都可以直
- * 接 dispatch action。如果传入的是一个函数作为 actionCreators，返回的也是一个函数。
+ * 一个与原对象类似的对象，只不过这个对象中的的每个函数值都可以直接 dispatch action。
+ * 如果传入的是一个函数作为 actionCreators，返回的也是一个函数。
  */
 // {
-//   addTodo: Function,
+//   addTodo: Function, // Function 是 actionCreator
 //   removeTodo: Function
 // }
 export default function bindActionCreators(actionCreators, dispatch) {
