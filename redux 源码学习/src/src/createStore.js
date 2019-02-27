@@ -39,17 +39,16 @@ import isPlainObject from './utils/isPlainObject.js'
  * 返回值是一个对象，能提供读取 state、派发 dispatch 和订阅变化的功能
  */
 export default function createStore(reducer, preloadedState, enhancer) {
-  // 下面这几行代码主要的作用是用来判断和修正参数的
-  // 因为一部分参数可选，所以出现的情况就会比较多
-  // 1. 传入了reducer, enhancer，没有指定初始的 State
+  // 下面这几行代码主要的作用是用来判断和修正参数位置的, 因为一部分参数可选，所以出现的情况就会比较多
+
+  // 1. 只传入了 reducer, enhancer，没有指定初始的 State
   // createStore(reducer, enhancer)
-  // 判断 preloadedState 是一个函数并且 enhancer 是未定义
   if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
     enhancer = preloadedState
     preloadedState = undefined
   }
 
-  // 判断有没有传入 enhancer
+  // 如果有 enhancer，需要走 enhancer 的流程
   if (typeof enhancer !== 'undefined') {
     // 判断 enhancer 是不是一个函数
     if (typeof enhancer !== 'function') {
@@ -57,7 +56,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       throw new Error('Expected the enhancer to be a function.')
     }
     // 调用 enhancer ,返回一个新强化过的 store creator
-    // 这部分逻辑会比较麻烦，后面单独阐述
+    // 其实 enhancer 就是经过 applyMiddleware ，返回的一个函数
     return enhancer(createStore)(reducer, preloadedState)
   }
 
@@ -66,11 +65,11 @@ export default function createStore(reducer, preloadedState, enhancer) {
     throw new Error('Expected the reducer to be a function.')
   }
 
-  let currentReducer = reducer //把 reducer 赋值给 currentReducer
-  let currentState = preloadedState //把 preloadedState 赋值给 currentState，默认是 undefined
+  let currentReducer = reducer // 把 reducer 赋值给 currentReducer
+  let currentState = preloadedState // 把 preloadedState 赋值给 currentState，默认是 undefined
   let currentListeners = [] // 初始化 listeners 数组
   let nextListeners = currentListeners // nextListeners 和 currentListeners 指向同一个引用
-  let isDispatching = false // 标记是否正在进行 dispatch
+  let isDispatching = false // 标记是否正在进行 dispatch，其实就是 **锁** 的概念
 
   // 保存一份订阅的快照
   function ensureCanMutateNextListeners() {
@@ -88,9 +87,8 @@ export default function createStore(reducer, preloadedState, enhancer) {
    */
 
   function getState() {
-    // 其实就是 **锁** 的概念
-    // 如果我现在正在执行 dispatch，那么执行完成后我的 state 可能会变化
-    // 所以这个时候的 state 是不确定的，所以读取无意义
+    // 比如，我现在正在执行 dispatch，那么执行完成后我的 state 可能会变化
+    // 所以这个时候的 state 是不确定的，读取无意义
     if (isDispatching) {
       throw new Error(
         'You may not call store.getState() while the reducer is executing. ' +
@@ -121,7 +119,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
    * recent snapshot of the subscription list.
    *
    * 1. 订阅器（subscriptions） 在每次 dispatch() 调用之前都会保存一份快照。
-   *    当你在正在调用监听器（listener）的时候订阅(subscribe)或者去掉订阅（unsubscribe），
+   *    所以当 listener 正在执行的时候，订阅(subscribe)或者去掉订阅（unsubscribe），
    *    对当前的 dispatch() 不会有任何影响。但是对于下一次的 dispatch()，无论嵌套与否，
    *    都会使用订阅列表里最近的一次快照。
    * 
@@ -221,7 +219,7 @@ export default function createStore(reducer, preloadedState, enhancer) {
       )
     }
 
-    // 判断 action 对象的 type 属性等于 undefined 
+    // 判断 action 对象是否存在的 type 属性
     // action 内必须使用一个字符串类型的 type 字段来表示将要执行的动作
     if (typeof action.type === 'undefined') {
       throw new Error(
