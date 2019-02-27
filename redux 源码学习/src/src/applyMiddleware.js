@@ -35,11 +35,28 @@ import compose from './compose.js'
 // }
 
 // 可以让你像 dispatch 一般的 actions 那样 dispatch 异步 actions。
+// 用法 applyMiddleware(thunk, promise, logger)
+// 中间件是从右到左依次执行的
+// applyMiddleware 最后返回的是一个函数 enhancer
+// 大概的流程如下
+// thunk = ({ dispatch, getState }) => next => action => {
+  // dispatch 是经过包装的新 dispatch 
+//   if (typeof action === 'function') {
+//     return action(dispatch, getState, extraArgument);
+//   }
+  // next 是原始的 dispatch 函数
+//   return next(action);
+// };
+// applyMiddleware(thunk, promise, logger)(createStore)(reducer, [initState])
+
 export default function applyMiddleware(...middlewares) {
   // 返回的是一个 enhancer 
   return createStore => (...args) => {
-    // 在这里面又生成了一遍 store
+    // 在这里面生成了 store
+    // 作用其实就是提供 dispath 和 getState 这两个函数
     const store = createStore(...args)
+    
+    // 用闭包来保存了 dispatch ，实现了下面代码里面所有地方的公用
     let dispatch = () => {
       throw new Error(
         `Dispatching while constructing your middleware is not allowed. ` +
@@ -56,6 +73,8 @@ export default function applyMiddleware(...middlewares) {
     // compose(...chain) 返回一个高阶函数，如果调用的话，会从右到左执行chain 里面所有的函数
     // 然后又传进去 store.dispatch，这个时候终于把 middlewares 最里面的函数给返回了
     // 一层层增强 dispatch
+    // compose 最后生成的是一个函数
+    // (...arg) => thunk(promise(logger(...arg)))
     dispatch = compose(...chain)(store.dispatch)
 
     return {
@@ -64,3 +83,5 @@ export default function applyMiddleware(...middlewares) {
     }
   }
 }
+
+
