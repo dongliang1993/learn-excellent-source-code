@@ -1,22 +1,13 @@
-import { GLOBAL_HEADER } from './const'
-import { getUserInfo } from 'Utils/sdk'
-import browser from 'Utils/browser'
-const {
-  version: { AlaLiveAppVersion }
-} = browser
+import { GLOBAL_HEADER } from "./const";
 
-async function getNetworkHeader () {
-  const userInfo = await getUserInfo()
-  const headers = Object.assign({}, GLOBAL_HEADER)
+async function getNetworkHeader() {
+  const headers = Object.assign({}, GLOBAL_HEADER);
+  const userInfo = {}; // 这里可以根据各自的业务配置
   if (userInfo) {
-    headers.token = userInfo.token
-    headers.sign = userInfo.token
-    headers['userId'] = userInfo.userId // '9532'
-    if (AlaLiveAppVersion) {
-      headers['appVersion'] = AlaLiveAppVersion
-    }
+    headers.token = userInfo.token;
+    headers.userId = userInfo.userId;
   }
-  return headers
+  return headers;
 }
 
-export { getNetworkHeader }
+export { getNetworkHeader };

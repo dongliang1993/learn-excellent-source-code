@@ -56,6 +56,16 @@ function parseJSON(response) {
  * @returns {*}
  */
 function errorFilter(result) {
+  // 这部分是前后端约定的统一格式
+  // 比如我们公司的约定如下：
+  // {
+  //   code: 1000,
+  //   data: {
+  //     list: []
+  //   },
+  //   msg: ''
+  // }
+  // 所以在这里根据 code 统一处理
   if (result.code === SUCCESS_RESPONSE_COCE) {
     return result.data;
   } else {
